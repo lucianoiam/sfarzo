@@ -1,0 +1,20 @@
+# Build directories
+build/
+cmake-build-*/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.xcodeproj/
+*.xcworkspace/
+
+# JUCE generated
+JuceLibraryCode/
+Builds/
+
+# AI assistant
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
