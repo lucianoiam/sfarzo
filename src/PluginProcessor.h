@@ -5,11 +5,14 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+// Forward declare sfizz C API type
+typedef struct sfizz_synth_t sfizz_synth_t;
+
 class PluginProcessor : public juce::AudioProcessor
 {
 public:
     PluginProcessor();
-    ~PluginProcessor() override = default;
+    ~PluginProcessor() override;
 
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
@@ -37,6 +40,15 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
+    // Direct note control from UI
+    // TODO: Replace with MIDI injection so external MIDI keyboards
+    // and the soft keyboard use the same code path.
+    void noteOn(int note, int velocity);
+    void noteOff(int note, int velocity);
+
 private:
+    sfizz_synth_t* synth = nullptr;
+    juce::File sfzFile;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
 };

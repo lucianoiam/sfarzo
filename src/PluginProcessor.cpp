@@ -3,11 +3,41 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <sfizz.h>
 
 PluginProcessor::PluginProcessor()
     : AudioProcessor(BusesProperties()
                      .withOutput("Output", juce::AudioChannelSet::stereo(), true))
 {
+    synth = sfizz_create_synth();
+
+    // Load SFZ from bundle Resources folder (Contents/Resources/res/)
+    auto execDir = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+                       .getParentDirectory();
+    auto resDir = execDir.getParentDirectory()  // Contents
+                         .getChildFile("Resources")
+                         .getChildFile("res");
+
+    sfzFile = resDir.getChildFile("jRhodes3c")
+                    .getChildFile("jRhodes3c-looped-flac-sfz")
+                    .getChildFile("_jRhodes-stereo-looped.sfz");
+
+    if (sfzFile.existsAsFile())
+    {
+        DBG("Loading SFZ: " + sfzFile.getFullPathName());
+        sfizz_load_file(synth, sfzFile.getFullPathName().toRawUTF8());
+        DBG("Loaded " + juce::String(sfizz_get_num_regions(synth)) + " regions");
+    }
+    else
+    {
+        DBG("SFZ file not found: " + sfzFile.getFullPathName());
+    }
+}
+
+PluginProcessor::~PluginProcessor()
+{
+    if (synth)
+        sfizz_free(synth);
 }
 
 const juce::String PluginProcessor::getName() const
@@ -17,7 +47,7 @@ const juce::String PluginProcessor::getName() const
 
 bool PluginProcessor::acceptsMidi() const
 {
-    return false;
+    return true;
 }
 
 bool PluginProcessor::producesMidi() const
@@ -63,7 +93,8 @@ void PluginProcessor::changeProgramName(int index, const juce::String& newName)
 
 void PluginProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    juce::ignoreUnused(sampleRate, samplesPerBlock);
+    sfizz_set_sample_rate(synth, static_cast<float>(sampleRate));
+    sfizz_set_samples_per_block(synth, samplesPerBlock);
 }
 
 void PluginProcessor::releaseResources()
@@ -84,8 +115,11 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiB
     juce::ignoreUnused(midiMessages);
     juce::ScopedNoDenormals noDenormals;
 
-    // Clear output - no audio processing for now
-    buffer.clear();
+    auto numSamples = buffer.getNumSamples();
+
+    // Render sfizz output
+    float* outputs[2] = { buffer.getWritePointer(0), buffer.getWritePointer(1) };
+    sfizz_render_block(synth, outputs, 2, numSamples);
 }
 
 bool PluginProcessor::hasEditor() const
@@ -106,6 +140,16 @@ void PluginProcessor::getStateInformation(juce::MemoryBlock& destData)
 void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     juce::ignoreUnused(data, sizeInBytes);
+}
+
+void PluginProcessor::noteOn(int note, int velocity)
+{
+    sfizz_send_note_on(synth, 0, note, velocity);
+}
+
+void PluginProcessor::noteOff(int note, int velocity)
+{
+    sfizz_send_note_off(synth, 0, note, velocity);
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

@@ -18,3 +18,6 @@ Builds/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Resources (downloaded instruments)
+res/

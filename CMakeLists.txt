@@ -177,7 +177,7 @@ if(APPLE)
     set(CMP_UI_APP "${CMAKE_SOURCE_DIR}/ui/composeApp/build/compose/binaries/main/app/Sfarzo.app")
     set(CMP_UI_CONTENTS "${CMP_UI_APP}/Contents")
 
-    # Standalone - merge Compose runtime into bundle
+    # Standalone - merge Compose runtime and resources into bundle
     add_custom_command(TARGET Sfarzo_Standalone POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             "${CMP_UI_CONTENTS}/MacOS/Sfarzo"
@@ -194,10 +194,13 @@ if(APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy
             "${JUCE_CMP_UI_DIR}/lib/src/main/resources/libiosurface_renderer.dylib"
             "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/app/libiosurface_renderer.dylib"
-        COMMENT "Merging Compose runtime into Standalone bundle"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+            "${CMAKE_SOURCE_DIR}/res"
+            "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/Resources/res"
+        COMMENT "Merging Compose runtime and resources into Standalone bundle"
     )
 
-    # AU plugin - merge Compose runtime
+    # AU plugin - merge Compose runtime and resources
     add_custom_command(TARGET Sfarzo_AU POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             "${CMP_UI_CONTENTS}/MacOS/Sfarzo"
@@ -214,6 +217,9 @@ if(APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy
             "${JUCE_CMP_UI_DIR}/lib/src/main/resources/libiosurface_renderer.dylib"
             "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/app/libiosurface_renderer.dylib"
-        COMMENT "Merging Compose runtime into AU bundle"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+            "${CMAKE_SOURCE_DIR}/res"
+            "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/Resources/res"
+        COMMENT "Merging Compose runtime and resources into AU bundle"
     )
 endif()

@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import juce_cmp.Library
+import juce_cmp.ipc.JuceValueTree
 import org.androidaudioplugin.composeaudiocontrols.DiatonicKeyboard
 
 @Composable
@@ -29,8 +31,20 @@ fun HelloView() {
         ) {
             DiatonicKeyboard(
                 noteOnStates = noteOnStates,
-                onNoteOn = { note, _ -> noteOnStates[note] = 1L },
-                onNoteOff = { note, _ -> noteOnStates[note] = 0L },
+                onNoteOn = { note, _ ->
+                    noteOnStates[note] = 1L
+                    Library.send(JuceValueTree("noteOn").apply {
+                        this["note"] = note
+                        this["velocity"] = 127
+                    })
+                },
+                onNoteOff = { note, _ ->
+                    noteOnStates[note] = 0L
+                    Library.send(JuceValueTree("noteOff").apply {
+                        this["note"] = note
+                        this["velocity"] = 0
+                    })
+                },
                 octaveZeroBased = 3,
                 numWhiteKeys = 28,
                 totalHeight = 80.dp,
