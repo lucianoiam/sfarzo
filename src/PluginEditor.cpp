@@ -6,9 +6,9 @@
 PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p), processorRef(p)
 {
-    setSize(800, 600);
+    setSize(800, 400);
     setResizable(true, true);
-    setResizeLimits(400, 300, 2048, 2048);
+    setResizeLimits(400, 200, 2048, 1024);
 
     composeComponent.onFirstFrame([this] {
         uiReady = true;

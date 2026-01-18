@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.kotlinx.coroutinesSwing)
     implementation("net.java.dev.jna:jna:5.14.0")
     implementation("com.github.juce-cmp:lib")
+    implementation("org.androidaudioplugin:compose-audio-controls:0.7.1")
 
     testImplementation(libs.kotlin.test)
 }

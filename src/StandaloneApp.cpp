@@ -45,7 +45,7 @@ private:
         {
             setUsingNativeTitleBar(true);
             setResizable(true, true);
-            setResizeLimits(400, 300, 2048, 2048);
+            setResizeLimits(400, 200, 2048, 1024);
 
             if (auto* editor = p->createEditor())
             {
