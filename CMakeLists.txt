@@ -36,7 +36,37 @@ FetchContent_Populate(juce-cmp)
 juce_add_module(${juce-cmp_SOURCE_DIR}/juce_cmp)
 
 #
-# 3. Build Compose UI runtime
+# 3. Fetch sfizz (library only, no plugins)
+#
+set(PLUGIN_AU OFF CACHE BOOL "" FORCE)
+set(PLUGIN_LV2 OFF CACHE BOOL "" FORCE)
+set(PLUGIN_VST3 OFF CACHE BOOL "" FORCE)
+set(SFIZZ_JACK OFF CACHE BOOL "" FORCE)
+set(SFIZZ_RENDER OFF CACHE BOOL "" FORCE)
+set(SFIZZ_SHARED OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+    sfizz
+    GIT_REPOSITORY https://github.com/sfztools/sfizz.git
+    GIT_TAG        develop
+)
+FetchContent_GetProperties(sfizz)
+if(NOT sfizz_POPULATED)
+    FetchContent_Populate(sfizz)
+
+    # Patch atomic_queue for Clang 17+ compatibility
+    # Fix: "a template argument list is expected after a name prefixed by the template keyword"
+    set(ATOMIC_QUEUE_FILE "${sfizz_SOURCE_DIR}/external/atomic_queue/include/atomic_queue/atomic_queue.h")
+    file(READ "${ATOMIC_QUEUE_FILE}" ATOMIC_QUEUE_CONTENT)
+    string(REPLACE "Base::template do_pop_any(" "Base::do_pop_any(" ATOMIC_QUEUE_CONTENT "${ATOMIC_QUEUE_CONTENT}")
+    string(REPLACE "Base::template do_push_any(" "Base::do_push_any(" ATOMIC_QUEUE_CONTENT "${ATOMIC_QUEUE_CONTENT}")
+    file(WRITE "${ATOMIC_QUEUE_FILE}" "${ATOMIC_QUEUE_CONTENT}")
+
+    add_subdirectory(${sfizz_SOURCE_DIR} ${sfizz_BINARY_DIR})
+endif()
+
+#
+# 4. Build Compose UI runtime
 #
 set(JUCE_CMP_UI_DIR "${juce-cmp_SOURCE_DIR}/juce_cmp_ui")
 set(NATIVE_RENDERER_SRC "${JUCE_CMP_UI_DIR}/lib/src/main/cpp/iosurface_renderer.m")
@@ -91,7 +121,7 @@ add_custom_command(
 add_custom_target(sfarzo_ui ALL DEPENDS "${UI_STAMP_FILE}")
 
 #
-# 4. Build Sfarzo plugin (Standalone + AU)
+# 5. Build Sfarzo plugin (Standalone + AU)
 #
 juce_add_plugin(Sfarzo
     COMPANY_NAME "Sfarzo"
@@ -130,6 +160,7 @@ target_link_libraries(Sfarzo
     PRIVATE
         juce_cmp
         juce::juce_audio_utils
+        sfizz::sfizz
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_lto_flags
