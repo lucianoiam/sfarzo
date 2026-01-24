@@ -21,3 +21,6 @@ Thumbs.db
 
 # Resources (downloaded instruments)
 res/
+
+# Local development
+deps/

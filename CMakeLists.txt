@@ -50,20 +50,22 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/sfztools/sfizz.git
     GIT_TAG        develop
 )
-FetchContent_GetProperties(sfizz)
-if(NOT sfizz_POPULATED)
+set(SFIZZ_SRC_DIR "${FETCHCONTENT_BASE_DIR}/sfizz-src")
+set(SFIZZ_BIN_DIR "${FETCHCONTENT_BASE_DIR}/sfizz-build")
+
+if(NOT EXISTS "${SFIZZ_SRC_DIR}/CMakeLists.txt")
     FetchContent_Populate(sfizz)
 
     # Patch atomic_queue for Clang 17+ compatibility
     # Fix: "a template argument list is expected after a name prefixed by the template keyword"
-    set(ATOMIC_QUEUE_FILE "${sfizz_SOURCE_DIR}/external/atomic_queue/include/atomic_queue/atomic_queue.h")
+    set(ATOMIC_QUEUE_FILE "${SFIZZ_SRC_DIR}/external/atomic_queue/include/atomic_queue/atomic_queue.h")
     file(READ "${ATOMIC_QUEUE_FILE}" ATOMIC_QUEUE_CONTENT)
     string(REPLACE "Base::template do_pop_any(" "Base::do_pop_any(" ATOMIC_QUEUE_CONTENT "${ATOMIC_QUEUE_CONTENT}")
     string(REPLACE "Base::template do_push_any(" "Base::do_push_any(" ATOMIC_QUEUE_CONTENT "${ATOMIC_QUEUE_CONTENT}")
     file(WRITE "${ATOMIC_QUEUE_FILE}" "${ATOMIC_QUEUE_CONTENT}")
-
-    add_subdirectory(${sfizz_SOURCE_DIR} ${sfizz_BINARY_DIR})
 endif()
+
+add_subdirectory(${SFIZZ_SRC_DIR} ${SFIZZ_BIN_DIR} EXCLUDE_FROM_ALL)
 
 #
 # 4. Build Compose UI runtime
@@ -101,7 +103,6 @@ else()
 endif()
 
 file(GLOB_RECURSE KOTLIN_SOURCES
-    CONFIGURE_DEPENDS
     "${UI_DIR}/composeApp/src/*.kt"
     "${JUCE_CMP_UI_DIR}/lib/src/*.kt"
 )
