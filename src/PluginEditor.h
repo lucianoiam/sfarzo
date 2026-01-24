@@ -14,7 +14,6 @@ public:
     ~PluginEditor() override = default;
 
     void paint(juce::Graphics&) override;
-    void paintOverChildren(juce::Graphics&) override;
     void resized() override;
 
 private:
@@ -24,7 +23,6 @@ private:
     PluginProcessor& processorRef;
     juce_cmp::ComposeComponent composeComponent;
     std::unique_ptr<juce::FileChooser> fileChooser;
-    bool uiReady = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
 };

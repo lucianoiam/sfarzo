@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "PluginEditor.h"
+#include "LoadingPreview.h"
 
 PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p), processorRef(p)
@@ -69,14 +70,16 @@ PluginEditor::PluginEditor(PluginProcessor& p)
         }
     });
 
-    composeComponent.onFirstFrame([this] {
-        uiReady = true;
-        repaint();
-    });
 
     composeComponent.onMidi([this](const juce::MidiMessage& message) {
         processorRef.addMidiFromUI(message);
     });
+
+    // Display captured first frame while Compose UI loads
+    // NOTE: Background color should match Compose UI background in HelloView.kt
+    composeComponent.setLoadingPreview(
+        juce::ImageFileFormat::loadFrom(loading_preview_png, loading_preview_png_len),
+        juce::Colour(0xFF2D2D2D));
 
     addAndMakeVisible(composeComponent);
 }
@@ -86,16 +89,6 @@ void PluginEditor::paint(juce::Graphics& g)
     juce::ignoreUnused(g);
 }
 
-void PluginEditor::paintOverChildren(juce::Graphics& g)
-{
-    if (uiReady)
-        return;
-
-    g.fillAll(juce::Colour(0xFF2D2D2D));
-    g.setColour(juce::Colour(0xFF888888));
-    g.setFont(juce::FontOptions(15.0f));
-    g.drawFittedText("Starting UI...", getLocalBounds(), juce::Justification::centred, 1);
-}
 
 void PluginEditor::resized()
 {

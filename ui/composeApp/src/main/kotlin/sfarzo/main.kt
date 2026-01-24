@@ -10,6 +10,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import juce_cmp.Library
 import juce_cmp.ipc.JuceValueTree
+import juce_cmp.renderer.captureFirstFrame
 
 object SfzState {
     var name by mutableStateOf("")
@@ -24,6 +25,8 @@ fun main(args: Array<String>) {
 
     if (Library.hasHost) {
         Library.host(
+            // DEV: Uncomment to generate loading_preview.png from first rendered frame
+            // onFrameRendered = captureFirstFrame("/tmp/loading_preview.png"),
             onJuceEvent = { tree ->
                 when (tree.type) {
                     "sfzLoaded" -> {
