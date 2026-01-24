@@ -18,8 +18,12 @@ public:
     void resized() override;
 
 private:
+    void sendSfzName(const juce::String& name);
+    void sendSfzError(const juce::String& error);
+
     PluginProcessor& processorRef;
     juce_cmp::ComposeComponent composeComponent;
+    std::unique_ptr<juce::FileChooser> fileChooser;
     bool uiReady = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)

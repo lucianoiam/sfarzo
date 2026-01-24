@@ -44,9 +44,15 @@ public:
     // Add MIDI from UI (thread-safe, called from message thread)
     void addMidiFromUI(const juce::MidiMessage& message);
 
+    // Load an SFZ file, returns the file name without extension
+    juce::String loadSfzFile(const juce::File& file);
+
+    // Get the currently loaded SFZ name (empty if none)
+    juce::String getLoadedSfzName() const { return loadedSfzName; }
+
 private:
     sfizz_synth_t* synth = nullptr;
-    juce::File sfzFile;
+    juce::String loadedSfzName;
 
     // MIDI from UI, accessed from both message thread and audio thread
     juce::MidiBuffer uiMidiBuffer;

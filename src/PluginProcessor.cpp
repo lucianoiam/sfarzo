@@ -11,26 +11,18 @@ PluginProcessor::PluginProcessor()
 {
     synth = sfizz_create_synth();
 
-    // Load SFZ from bundle Resources folder
+    // Load default SFZ from bundle Resources folder
     auto execDir = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
                        .getParentDirectory();
     auto resDir = execDir.getParentDirectory()  // Contents
                          .getChildFile("Resources");
 
-    sfzFile = resDir.getChildFile("jRhodes3c")
-                    .getChildFile("jRhodes3c-looped-flac-sfz")
-                    .getChildFile("_jRhodes-stereo-looped.sfz");
+    auto defaultSfz = resDir.getChildFile("jRhodes3c")
+                            .getChildFile("jRhodes3c-looped-flac-sfz")
+                            .getChildFile("_jRhodes-stereo-looped.sfz");
 
-    if (sfzFile.existsAsFile())
-    {
-        DBG("Loading SFZ: " + sfzFile.getFullPathName());
-        sfizz_load_file(synth, sfzFile.getFullPathName().toRawUTF8());
-        DBG("Loaded " + juce::String(sfizz_get_num_regions(synth)) + " regions");
-    }
-    else
-    {
-        DBG("SFZ file not found: " + sfzFile.getFullPathName());
-    }
+    if (defaultSfz.existsAsFile())
+        loadSfzFile(defaultSfz);
 }
 
 PluginProcessor::~PluginProcessor()
@@ -154,6 +146,21 @@ void PluginProcessor::getStateInformation(juce::MemoryBlock& destData)
 void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
     juce::ignoreUnused(data, sizeInBytes);
+}
+
+juce::String PluginProcessor::loadSfzFile(const juce::File& file)
+{
+    if (!file.existsAsFile())
+        return {};
+
+    if (!sfizz_load_file(synth, file.getFullPathName().toRawUTF8()))
+    {
+        loadedSfzName = {};
+        return {};
+    }
+
+    loadedSfzName = file.getFileNameWithoutExtension();
+    return loadedSfzName;
 }
 
 void PluginProcessor::addMidiFromUI(const juce::MidiMessage& message)

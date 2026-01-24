@@ -10,6 +10,35 @@ PluginEditor::PluginEditor(PluginProcessor& p)
     setResizable(true, true);
     setResizeLimits(400, 200, 2048, 1024);
 
+    composeComponent.onProcessReady([this] {
+        sendSfzName(processorRef.getLoadedSfzName());
+    });
+
+    composeComponent.onEvent([this](const juce::ValueTree& tree) {
+        if (tree.getType() == juce::Identifier("action"))
+        {
+            auto name = tree.getProperty("name").toString();
+            if (name == "loadSfz")
+            {
+                fileChooser = std::make_unique<juce::FileChooser>(
+                    "Load SFZ", juce::File(), "*.sfz");
+                fileChooser->launchAsync(juce::FileBrowserComponent::openMode
+                    | juce::FileBrowserComponent::canSelectFiles,
+                    [this](const juce::FileChooser& fc) {
+                        auto file = fc.getResult();
+                        if (!file.existsAsFile())
+                            return;
+
+                        auto loaded = processorRef.loadSfzFile(file);
+                        if (loaded.isNotEmpty())
+                            sendSfzName(loaded);
+                        else
+                            sendSfzError("Failed to load " + file.getFileName());
+                    });
+            }
+        }
+    });
+
     composeComponent.onFirstFrame([this] {
         uiReady = true;
         repaint();
@@ -41,4 +70,18 @@ void PluginEditor::paintOverChildren(juce::Graphics& g)
 void PluginEditor::resized()
 {
     composeComponent.setBounds(getLocalBounds());
+}
+
+void PluginEditor::sendSfzName(const juce::String& name)
+{
+    juce::ValueTree tree("sfzLoaded");
+    tree.setProperty("name", name, nullptr);
+    composeComponent.sendEvent(tree);
+}
+
+void PluginEditor::sendSfzError(const juce::String& error)
+{
+    juce::ValueTree tree("sfzError");
+    tree.setProperty("message", error, nullptr);
+    composeComponent.sendEvent(tree);
 }
