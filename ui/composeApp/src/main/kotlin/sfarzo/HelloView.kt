@@ -72,6 +72,9 @@ private fun Toolbar() {
 }
 
 private fun showSfzFilePicker() {
+    // Bring Java process to foreground so the dialog gets focus
+    java.awt.Desktop.getDesktop().requestForeground(true)
+
     val dialog = FileDialog(null as Frame?, "Load SFZ", FileDialog.LOAD)
     dialog.filenameFilter = FilenameFilter { _, name -> name.endsWith(".sfz", ignoreCase = true) }
     dialog.isVisible = true
