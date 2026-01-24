@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -20,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import juce_cmp.Library
 import juce_cmp.ipc.JuceValueTree
@@ -32,35 +33,18 @@ fun HelloView() {
     val noteOnStates = remember { mutableStateListOf(*Array(128) { 0L }) }
 
     MaterialTheme {
-        BoxWithConstraints(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFF2D2D2D))
         ) {
-            val keyboardHeight = (maxHeight * 0.3f).coerceIn(60.dp, 200.dp)
-            val blackKeyHeight = keyboardHeight * 0.6f
+            Toolbar()
 
-            Column(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Button(onClick = {
-                        val tree = JuceValueTree("action")
-                        tree["name"] = "loadSfz"
-                        Library.sendJuceEvent(tree)
-                    }) {
-                        Text("Load SFZ...")
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = if (SfzState.error.isNotEmpty()) SfzState.error else SfzState.name,
-                        color = if (SfzState.error.isNotEmpty()) Color(0xFFFF6B6B) else Color.White
-                    )
-                }
+            Spacer(modifier = Modifier.weight(1f))
 
-                Spacer(modifier = Modifier.weight(1f))
-
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxWidth().aspectRatio(6f)
+            ) {
                 DiatonicKeyboard(
                     noteOnStates = noteOnStates,
                     onNoteOn = { note, _ ->
@@ -73,10 +57,32 @@ fun HelloView() {
                     },
                     octaveZeroBased = 3,
                     numWhiteKeys = 28,
-                    totalHeight = keyboardHeight,
-                    blackKeyHeight = blackKeyHeight
+                    totalWidth = null,
+                    totalHeight = maxHeight,
+                    blackKeyHeight = maxHeight * 0.6f
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun Toolbar() {
+    Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Button(onClick = {
+            val tree = JuceValueTree("action")
+            tree["name"] = "loadSfz"
+            Library.sendJuceEvent(tree)
+        }) {
+            Text("Load SFZ...")
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = if (SfzState.error.isNotEmpty()) SfzState.error else SfzState.name,
+            color = if (SfzState.error.isNotEmpty()) Color(0xFFFF6B6B) else Color.White
+        )
     }
 }
