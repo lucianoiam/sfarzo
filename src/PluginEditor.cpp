@@ -18,24 +18,54 @@ PluginEditor::PluginEditor(PluginProcessor& p)
         if (tree.getType() == juce::Identifier("action"))
         {
             auto name = tree.getProperty("name").toString();
-            if (name == "loadSfz")
-            {
-                fileChooser = std::make_unique<juce::FileChooser>(
-                    "Load SFZ", juce::File(), "*.sfz");
-                fileChooser->launchAsync(juce::FileBrowserComponent::openMode
-                    | juce::FileBrowserComponent::canSelectFiles,
-                    [this](const juce::FileChooser& fc) {
-                        auto file = fc.getResult();
-                        if (!file.existsAsFile())
-                            return;
 
-                        auto loaded = processorRef.loadSfzFile(file);
-                        if (loaded.isNotEmpty())
-                            sendSfzName(loaded);
-                        else
-                            sendSfzError("Failed to load " + file.getFileName());
-                    });
+            // Experimenting with two approaches for file dialogs:
+            // 1. AWT FileDialog (current) - picker runs in Compose process
+            // 2. JUCE FileChooser (commented below) - picker runs in host process
+
+            if (name == "loadSfzFile")
+            {
+                // AWT FileDialog approach: path comes from Compose side
+                auto path = tree.getProperty("path").toString();
+                auto file = juce::File(path);
+                if (!file.existsAsFile())
+                {
+                    sendSfzError("File not found");
+                    return;
+                }
+
+                auto loaded = processorRef.loadSfzFile(file);
+                if (loaded.isNotEmpty())
+                    sendSfzName(loaded);
+                else
+                    sendSfzError("Failed to load " + file.getFileName());
+
+                // Restore focus to host window after AWT dialog.
+                // Use Process::makeForegroundProcess() instead of toFront() because
+                // when running as AU plugin, we need to activate the host process
+                // (e.g., Ableton Live), not just the JUCE component.
+                juce::Process::makeForegroundProcess();
             }
+
+            // Alternative: JUCE FileChooser approach
+            // if (name == "loadSfz")
+            // {
+            //     fileChooser = std::make_unique<juce::FileChooser>(
+            //         "Load SFZ", juce::File(), "*.sfz");
+            //     fileChooser->launchAsync(juce::FileBrowserComponent::openMode
+            //         | juce::FileBrowserComponent::canSelectFiles,
+            //         [this](const juce::FileChooser& fc) {
+            //             auto file = fc.getResult();
+            //             if (!file.existsAsFile())
+            //                 return;
+            //
+            //             auto loaded = processorRef.loadSfzFile(file);
+            //             if (loaded.isNotEmpty())
+            //                 sendSfzName(loaded);
+            //             else
+            //                 sendSfzError("Failed to load " + file.getFileName());
+            //         });
+            // }
         }
     });
 

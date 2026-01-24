@@ -17,6 +17,9 @@ object SfzState {
 }
 
 fun main(args: Array<String>) {
+    // Make AWT dialogs follow system appearance (dark/light mode)
+    System.setProperty("apple.awt.application.appearance", "system")
+
     Library.init(args)
 
     if (Library.hasHost) {

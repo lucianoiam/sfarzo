@@ -26,6 +26,9 @@ import androidx.compose.ui.unit.dp
 import juce_cmp.Library
 import juce_cmp.ipc.JuceValueTree
 import org.androidaudioplugin.composeaudiocontrols.DiatonicKeyboard
+import java.awt.FileDialog
+import java.awt.Frame
+import java.io.FilenameFilter
 import javax.sound.midi.ShortMessage
 
 @Composable
@@ -48,9 +51,15 @@ private fun Toolbar() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Button(onClick = {
-            val tree = JuceValueTree("action")
-            tree["name"] = "loadSfz"
-            Library.sendJuceEvent(tree)
+            // Experimenting with two approaches for file dialogs:
+            // 1. AWT FileDialog (current) - picker runs in Compose process
+            // 2. JUCE FileChooser (commented below) - picker runs in host process
+            showSfzFilePicker()
+
+            // Alternative: trigger JUCE-side file picker
+            // val tree = JuceValueTree("action")
+            // tree["name"] = "loadSfz"
+            // Library.sendJuceEvent(tree)
         }) {
             Text("Load SFZ...")
         }
@@ -59,6 +68,22 @@ private fun Toolbar() {
             text = if (SfzState.error.isNotEmpty()) SfzState.error else SfzState.name,
             color = if (SfzState.error.isNotEmpty()) Color(0xFFFF6B6B) else Color.White
         )
+    }
+}
+
+private fun showSfzFilePicker() {
+    val dialog = FileDialog(null as Frame?, "Load SFZ", FileDialog.LOAD)
+    dialog.filenameFilter = FilenameFilter { _, name -> name.endsWith(".sfz", ignoreCase = true) }
+    dialog.isVisible = true
+
+    val file = dialog.file
+    val dir = dialog.directory
+    if (file != null && dir != null) {
+        val path = dir + file
+        val tree = JuceValueTree("action")
+        tree["name"] = "loadSfzFile"
+        tree["path"] = path
+        Library.sendJuceEvent(tree)
     }
 }
 
