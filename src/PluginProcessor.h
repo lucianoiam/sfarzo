@@ -4,6 +4,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <mutex>
 
 // Forward declare sfizz C API type
 typedef struct sfizz_synth_t sfizz_synth_t;
@@ -40,15 +41,16 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    // Direct note control from UI
-    // TODO: Replace with MIDI injection so external MIDI keyboards
-    // and the soft keyboard use the same code path.
-    void noteOn(int note, int velocity);
-    void noteOff(int note, int velocity);
+    // Add MIDI from UI (thread-safe, called from message thread)
+    void addMidiFromUI(const juce::MidiMessage& message);
 
 private:
     sfizz_synth_t* synth = nullptr;
     juce::File sfzFile;
+
+    // MIDI from UI, accessed from both message thread and audio thread
+    juce::MidiBuffer uiMidiBuffer;
+    std::mutex uiMidiMutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
 };

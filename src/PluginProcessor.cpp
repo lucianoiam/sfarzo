@@ -112,12 +112,27 @@ bool PluginProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 
 void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused(midiMessages);
     juce::ScopedNoDenormals noDenormals;
 
-    auto numSamples = buffer.getNumSamples();
+    // Merge UI MIDI into host MIDI buffer
+    {
+        std::lock_guard<std::mutex> lock(uiMidiMutex);
+        midiMessages.addEvents(uiMidiBuffer, 0, buffer.getNumSamples(), 0);
+        uiMidiBuffer.clear();
+    }
+
+    // Process MIDI and send to sfizz
+    for (const auto metadata : midiMessages)
+    {
+        auto message = metadata.getMessage();
+        if (message.isNoteOn())
+            sfizz_send_note_on(synth, 0, message.getNoteNumber(), message.getVelocity());
+        else if (message.isNoteOff())
+            sfizz_send_note_off(synth, 0, message.getNoteNumber(), message.getVelocity());
+    }
 
     // Render sfizz output
+    auto numSamples = buffer.getNumSamples();
     float* outputs[2] = { buffer.getWritePointer(0), buffer.getWritePointer(1) };
     sfizz_render_block(synth, outputs, 2, numSamples);
 }
@@ -142,14 +157,10 @@ void PluginProcessor::setStateInformation(const void* data, int sizeInBytes)
     juce::ignoreUnused(data, sizeInBytes);
 }
 
-void PluginProcessor::noteOn(int note, int velocity)
+void PluginProcessor::addMidiFromUI(const juce::MidiMessage& message)
 {
-    sfizz_send_note_on(synth, 0, note, velocity);
-}
-
-void PluginProcessor::noteOff(int note, int velocity)
-{
-    sfizz_send_note_off(synth, 0, note, velocity);
+    std::lock_guard<std::mutex> lock(uiMidiMutex);
+    uiMidiBuffer.addEvent(message, 0);
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import juce_cmp.Library
-import juce_cmp.ipc.JuceValueTree
 import org.androidaudioplugin.composeaudiocontrols.DiatonicKeyboard
+import javax.sound.midi.ShortMessage
 
 @Composable
 fun HelloView() {
@@ -33,17 +33,11 @@ fun HelloView() {
                 noteOnStates = noteOnStates,
                 onNoteOn = { note, _ ->
                     noteOnStates[note] = 1L
-                    Library.send(JuceValueTree("noteOn").apply {
-                        this["note"] = note
-                        this["velocity"] = 127
-                    })
+                    Library.sendMidiEvent(ShortMessage(ShortMessage.NOTE_ON, 0, note, 127))
                 },
                 onNoteOff = { note, _ ->
                     noteOnStates[note] = 0L
-                    Library.send(JuceValueTree("noteOff").apply {
-                        this["note"] = note
-                        this["velocity"] = 0
-                    })
+                    Library.sendMidiEvent(ShortMessage(ShortMessage.NOTE_OFF, 0, note, 0))
                 },
                 octaveZeroBased = 3,
                 numWhiteKeys = 28,

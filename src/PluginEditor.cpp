@@ -15,8 +15,8 @@ PluginEditor::PluginEditor(PluginProcessor& p)
         repaint();
     });
 
-    composeComponent.onEvent([this](const juce::ValueTree& tree) {
-        handleUIEvent(tree);
+    composeComponent.onMidi([this](const juce::MidiMessage& message) {
+        processorRef.addMidiFromUI(message);
     });
 
     addAndMakeVisible(composeComponent);
@@ -41,22 +41,4 @@ void PluginEditor::paintOverChildren(juce::Graphics& g)
 void PluginEditor::resized()
 {
     composeComponent.setBounds(getLocalBounds());
-}
-
-void PluginEditor::handleUIEvent(const juce::ValueTree& tree)
-{
-    auto type = tree.getType().toString();
-
-    if (type == "noteOn")
-    {
-        int note = tree.getProperty("note", 0);
-        int velocity = tree.getProperty("velocity", 127);
-        processorRef.noteOn(note, velocity);
-    }
-    else if (type == "noteOff")
-    {
-        int note = tree.getProperty("note", 0);
-        int velocity = tree.getProperty("velocity", 0);
-        processorRef.noteOff(note, velocity);
-    }
 }

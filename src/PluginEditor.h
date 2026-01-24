@@ -18,8 +18,6 @@ public:
     void resized() override;
 
 private:
-    void handleUIEvent(const juce::ValueTree& tree);
-
     PluginProcessor& processorRef;
     juce_cmp::ComposeComponent composeComponent;
     bool uiReady = false;
