@@ -197,7 +197,7 @@ if(APPLE)
             "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/app/libiosurface_renderer.dylib"
         COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
             "${CMAKE_SOURCE_DIR}/res"
-            "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/Resources/res"
+            "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/Resources"
         COMMENT "Merging Compose runtime and resources into Standalone bundle"
     )
 
@@ -220,7 +220,7 @@ if(APPLE)
             "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/app/libiosurface_renderer.dylib"
         COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
             "${CMAKE_SOURCE_DIR}/res"
-            "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/Resources/res"
+            "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/Resources"
         COMMENT "Merging Compose runtime and resources into AU bundle"
     )
 endif()

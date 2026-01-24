@@ -11,12 +11,11 @@ PluginProcessor::PluginProcessor()
 {
     synth = sfizz_create_synth();
 
-    // Load SFZ from bundle Resources folder (Contents/Resources/res/)
+    // Load SFZ from bundle Resources folder
     auto execDir = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
                        .getParentDirectory();
     auto resDir = execDir.getParentDirectory()  // Contents
-                         .getChildFile("Resources")
-                         .getChildFile("res");
+                         .getChildFile("Resources");
 
     sfzFile = resDir.getChildFile("jRhodes3c")
                     .getChildFile("jRhodes3c-looped-flac-sfz")
