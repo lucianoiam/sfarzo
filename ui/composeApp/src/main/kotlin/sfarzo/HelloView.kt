@@ -30,38 +30,13 @@ import javax.sound.midi.ShortMessage
 
 @Composable
 fun HelloView() {
-    val noteOnStates = remember { mutableStateListOf(*Array(128) { 0L }) }
-
     MaterialTheme {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF2D2D2D))
+            modifier = Modifier.fillMaxSize().background(Color(0xFF2D2D2D))
         ) {
             Toolbar()
-
             Spacer(modifier = Modifier.weight(1f))
-
-            BoxWithConstraints(
-                modifier = Modifier.fillMaxWidth().aspectRatio(6f)
-            ) {
-                DiatonicKeyboard(
-                    noteOnStates = noteOnStates,
-                    onNoteOn = { note, _ ->
-                        noteOnStates[note] = 1L
-                        Library.sendMidiEvent(ShortMessage(ShortMessage.NOTE_ON, 0, note, 127))
-                    },
-                    onNoteOff = { note, _ ->
-                        noteOnStates[note] = 0L
-                        Library.sendMidiEvent(ShortMessage(ShortMessage.NOTE_OFF, 0, note, 0))
-                    },
-                    octaveZeroBased = 3,
-                    numWhiteKeys = 28,
-                    totalWidth = null,
-                    totalHeight = maxHeight,
-                    blackKeyHeight = maxHeight * 0.6f
-                )
-            }
+            Keyboard(modifier = Modifier.fillMaxWidth().aspectRatio(6f))
         }
     }
 }
@@ -83,6 +58,33 @@ private fun Toolbar() {
         Text(
             text = if (SfzState.error.isNotEmpty()) SfzState.error else SfzState.name,
             color = if (SfzState.error.isNotEmpty()) Color(0xFFFF6B6B) else Color.White
+        )
+    }
+}
+
+@Composable
+private fun Keyboard(modifier: Modifier = Modifier) {
+    val noteOnStates = remember { mutableStateListOf(*Array(128) { 0L }) }
+    val numWhiteKeys = 28
+
+    BoxWithConstraints(modifier = modifier) {
+        val whiteKeyWidth = maxWidth / numWhiteKeys
+        DiatonicKeyboard(
+            noteOnStates = noteOnStates,
+            onNoteOn = { note, _ ->
+                noteOnStates[note] = 1L
+                Library.sendMidiEvent(ShortMessage(ShortMessage.NOTE_ON, 0, note, 127))
+            },
+            onNoteOff = { note, _ ->
+                noteOnStates[note] = 0L
+                Library.sendMidiEvent(ShortMessage(ShortMessage.NOTE_OFF, 0, note, 0))
+            },
+            octaveZeroBased = 3,
+            numWhiteKeys = numWhiteKeys,
+            whiteKeyWidth = whiteKeyWidth,
+            totalWidth = maxWidth,
+            totalHeight = maxHeight,
+            blackKeyHeight = maxHeight * 0.6f
         )
     }
 }
