@@ -102,7 +102,7 @@ else()
     set(GRADLE_CMD ./gradlew)
 endif()
 
-file(GLOB_RECURSE KOTLIN_SOURCES
+file(GLOB_RECURSE KOTLIN_SOURCES CONFIGURE_DEPENDS
     "${UI_DIR}/composeApp/src/*.kt"
     "${JUCE_CMP_UI_DIR}/lib/src/*.kt"
 )
