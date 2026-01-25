@@ -21,51 +21,47 @@ PluginEditor::PluginEditor(PluginProcessor& p)
             auto name = tree.getProperty("name").toString();
 
             // Experimenting with two approaches for file dialogs:
-            // 1. AWT FileDialog (current) - picker runs in Compose process
-            // 2. JUCE FileChooser (commented below) - picker runs in host process
+            // 1. JUCE FileChooser (current) - picker runs in host process
+            // 2. AWT FileDialog (commented below) - picker runs in Compose process
 
-            if (name == "loadSfzFile")
+            if (name == "loadSfz")
             {
-                // AWT FileDialog approach: path comes from Compose side
-                auto path = tree.getProperty("path").toString();
-                auto file = juce::File(path);
-                if (!file.existsAsFile())
-                {
-                    sendSfzError("File not found");
-                    return;
-                }
+                fileChooser = std::make_unique<juce::FileChooser>(
+                    "Load SFZ", juce::File(), "*.sfz");
+                fileChooser->launchAsync(juce::FileBrowserComponent::openMode
+                    | juce::FileBrowserComponent::canSelectFiles,
+                    [this](const juce::FileChooser& fc) {
+                        auto file = fc.getResult();
+                        if (!file.existsAsFile())
+                            return;
 
-                auto loaded = processorRef.loadSfzFile(file);
-                if (loaded.isNotEmpty())
-                    sendSfzName(loaded);
-                else
-                    sendSfzError("Failed to load " + file.getFileName());
-
-                // Restore focus to host window after AWT dialog.
-                // Use Process::makeForegroundProcess() instead of toFront() because
-                // when running as AU plugin, we need to activate the host process
-                // (e.g., Ableton Live), not just the JUCE component.
-                juce::Process::makeForegroundProcess();
+                        auto loaded = processorRef.loadSfzFile(file);
+                        if (loaded.isNotEmpty())
+                            sendSfzName(loaded);
+                        else
+                            sendSfzError("Failed to load " + file.getFileName());
+                    });
             }
 
-            // Alternative: JUCE FileChooser approach
-            // if (name == "loadSfz")
+            // Alternative: AWT FileDialog approach
+            // if (name == "loadSfzFile")
             // {
-            //     fileChooser = std::make_unique<juce::FileChooser>(
-            //         "Load SFZ", juce::File(), "*.sfz");
-            //     fileChooser->launchAsync(juce::FileBrowserComponent::openMode
-            //         | juce::FileBrowserComponent::canSelectFiles,
-            //         [this](const juce::FileChooser& fc) {
-            //             auto file = fc.getResult();
-            //             if (!file.existsAsFile())
-            //                 return;
+            //     auto path = tree.getProperty("path").toString();
+            //     auto file = juce::File(path);
+            //     if (!file.existsAsFile())
+            //     {
+            //         sendSfzError("File not found");
+            //         return;
+            //     }
             //
-            //             auto loaded = processorRef.loadSfzFile(file);
-            //             if (loaded.isNotEmpty())
-            //                 sendSfzName(loaded);
-            //             else
-            //                 sendSfzError("Failed to load " + file.getFileName());
-            //         });
+            //     auto loaded = processorRef.loadSfzFile(file);
+            //     if (loaded.isNotEmpty())
+            //         sendSfzName(loaded);
+            //     else
+            //         sendSfzError("Failed to load " + file.getFileName());
+            //
+            //     // Restore focus to host window after AWT dialog
+            //     juce::Process::makeForegroundProcess();
             // }
         }
     });

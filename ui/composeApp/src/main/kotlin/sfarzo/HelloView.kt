@@ -52,14 +52,14 @@ private fun Toolbar() {
     ) {
         Button(onClick = {
             // Experimenting with two approaches for file dialogs:
-            // 1. AWT FileDialog (current) - picker runs in Compose process
-            // 2. JUCE FileChooser (commented below) - picker runs in host process
-            showSfzFilePicker()
+            // 1. JUCE FileChooser (current) - picker runs in host process
+            // 2. AWT FileDialog (commented below) - picker runs in Compose process
+            val tree = JuceValueTree("action")
+            tree["name"] = "loadSfz"
+            Library.sendJuceEvent(tree)
 
-            // Alternative: trigger JUCE-side file picker
-            // val tree = JuceValueTree("action")
-            // tree["name"] = "loadSfz"
-            // Library.sendJuceEvent(tree)
+            // Alternative: AWT file picker
+            // showSfzFilePicker()
         }) {
             Text("Load SFZ...")
         }
