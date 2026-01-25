@@ -182,13 +182,13 @@ if(APPLE)
     add_custom_command(TARGET Sfarzo_Standalone POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             "${CMP_UI_CONTENTS}/MacOS/Sfarzo"
-            "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/MacOS/ui"
+            "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/MacOS/Sfarzo_UI"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMP_UI_CONTENTS}/app"
             "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/app"
         COMMAND ${CMAKE_COMMAND} -E rename
             "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/app/Sfarzo.cfg"
-            "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/app/ui.cfg"
+            "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/app/Sfarzo_UI.cfg"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMP_UI_CONTENTS}/runtime"
             "$<TARGET_BUNDLE_DIR:Sfarzo_Standalone>/Contents/runtime"
@@ -205,13 +205,13 @@ if(APPLE)
     add_custom_command(TARGET Sfarzo_AU POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             "${CMP_UI_CONTENTS}/MacOS/Sfarzo"
-            "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/MacOS/ui"
+            "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/MacOS/Sfarzo_UI"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMP_UI_CONTENTS}/app"
             "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/app"
         COMMAND ${CMAKE_COMMAND} -E rename
             "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/app/Sfarzo.cfg"
-            "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/app/ui.cfg"
+            "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/app/Sfarzo_UI.cfg"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMP_UI_CONTENTS}/runtime"
             "$<TARGET_BUNDLE_DIR:Sfarzo_AU>/Contents/runtime"
