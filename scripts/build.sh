@@ -19,5 +19,15 @@ if [ ! -f build/CMakeCache.txt ]; then
     cmake -B build -G Ninja
 fi
 
-# Build (cmake handles incremental builds)
+# Force UI rebuild (Gradle handles incremental compilation)
+rm -f build/sfarzo_ui.stamp
+
+# Build
 cmake --build build
+
+# Copy UI to standalone bundle (post-build only runs when JUCE targets rebuild)
+CMP_UI="ui/composeApp/build/compose/binaries/main/app/Sfarzo.app/Contents"
+STANDALONE="build/Sfarzo_artefacts/Debug/Standalone/Sfarzo.app/Contents"
+cp "$CMP_UI/MacOS/Sfarzo" "$STANDALONE/MacOS/Sfarzo_UI"
+cp -r "$CMP_UI/app" "$STANDALONE/"
+mv "$STANDALONE/app/Sfarzo.cfg" "$STANDALONE/app/Sfarzo_UI.cfg" 2>/dev/null || true
