@@ -17,9 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import juce_cmp.Library
 import juce_cmp.ipc.JuceValueTree
-import java.awt.FileDialog
-import java.awt.Frame
-import java.io.FilenameFilter
 
 @Composable
 fun Toolbar() {

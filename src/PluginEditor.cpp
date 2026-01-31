@@ -66,13 +66,12 @@ PluginEditor::PluginEditor(PluginProcessor& p)
         }
     });
 
-
     composeComponent.onMidi([this](const juce::MidiMessage& message) {
         processorRef.addMidiFromUI(message);
     });
 
     // Display captured first frame while Compose UI loads
-    // NOTE: Background color should match Compose UI background in HelloView.kt
+    // NOTE: Background color should match Compose UI background in MainView.kt
     composeComponent.setLoadingPreview(
         juce::ImageFileFormat::loadFrom(loading_preview_png, loading_preview_png_len),
         juce::Colour(0xFF2D2D2D));
@@ -92,7 +91,6 @@ void PluginEditor::paint(juce::Graphics& g)
 {
     juce::ignoreUnused(g);
 }
-
 
 void PluginEditor::resized()
 {
