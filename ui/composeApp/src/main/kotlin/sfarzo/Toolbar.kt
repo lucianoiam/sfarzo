@@ -5,6 +5,7 @@ package sfarzo
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
@@ -45,6 +46,11 @@ fun Toolbar() {
         Text(
             text = pluginState.sfzError.ifEmpty { pluginState.sfzName },
             color = if (pluginState.sfzError.isNotEmpty()) Color(0xFFFF6B6B) else Color.White
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        VuMeter(
+            level = pluginState.rmsLevel,
+            modifier = Modifier.width(10.dp).height(30.dp)
         )
     }
 }
