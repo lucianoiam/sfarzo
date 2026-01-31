@@ -128,10 +128,14 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiB
     sfizz_render_block(synth, outputs, 2, numSamples);
 
     // Calculate RMS for metering (max of both channels)
-    float rms = 0.0f;
+    float rawRms = 0.0f;
     for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
-        rms = std::max(rms, buffer.getRMSLevel(ch, 0, numSamples));
-    rmsLevel.store(rms);
+        rawRms = std::max(rawRms, buffer.getRMSLevel(ch, 0, numSamples));
+
+    // Apply single-pole low-pass filter for smooth metering
+    // smoothedRms = coeff * smoothedRms + (1 - coeff) * rawRms
+    smoothedRms = rmsSmoothingCoeff * smoothedRms + (1.0f - rmsSmoothingCoeff) * rawRms;
+    rmsLevel.store(smoothedRms);
 }
 
 bool PluginProcessor::hasEditor() const

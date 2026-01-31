@@ -54,6 +54,11 @@ public:
     // Get current RMS level (0.0 to 1.0)
     float getRmsLevel() const { return rmsLevel.load(); }
 
+    // RMS smoothing coefficient (0.0 = no smoothing, 1.0 = full smoothing)
+    // Higher values = more smoothing, slower response
+    void setRmsSmoothing(float smoothing) { rmsSmoothingCoeff = juce::jlimit(0.0f, 0.99f, smoothing); }
+    float getRmsSmoothing() const { return rmsSmoothingCoeff; }
+
 private:
     sfizz_synth_t* synth = nullptr;
     juce::String loadedSfzName;
@@ -64,6 +69,8 @@ private:
 
     // RMS level for metering (written from audio thread, read from message thread)
     std::atomic<float> rmsLevel { 0.0f };
+    float smoothedRms { 0.0f };  // Internal state for LPF (audio thread only)
+    float rmsSmoothingCoeff { 0.85f };  // Default: moderate smoothing
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
 };
