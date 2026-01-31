@@ -15,6 +15,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import kotlin.math.log10
+
+private const val MIN_DB = -60f
+
+private fun amplitudeToDb(amplitude: Float): Float {
+    if (amplitude <= 0f) return 0f
+    val db = 20f * log10(amplitude)
+    return ((db - MIN_DB) / -MIN_DB).coerceIn(0f, 1f)
+}
 
 /**
  * Simple VU meter that displays a vertical bar with smooth decay.
@@ -29,17 +38,18 @@ fun VuMeter(
     level: Float,
     modifier: Modifier = Modifier,
     color: Color = Color.White,
-    decayMs: Int = 1500
+    decayMs: Int = 500
 ) {
     val animatedLevel = remember { Animatable(0f) }
+    val dbLevel = amplitudeToDb(level)
 
-    LaunchedEffect(level) {
+    LaunchedEffect(dbLevel) {
         // Snap to new level, then animate decay to 0
-        animatedLevel.snapTo(level)
+        animatedLevel.snapTo(dbLevel)
         animatedLevel.animateTo(
             targetValue = 0f,
             animationSpec = tween(
-                durationMillis = (level * decayMs).toInt(),
+                durationMillis = (dbLevel * decayMs).toInt(),
                 easing = LinearEasing
             )
         )
