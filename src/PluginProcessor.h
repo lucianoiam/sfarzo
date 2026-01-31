@@ -70,7 +70,7 @@ private:
     // RMS level for metering (written from audio thread, read from message thread)
     std::atomic<float> rmsLevel { 0.0f };
     float smoothedRms { 0.0f };  // Internal state for LPF (audio thread only)
-    float rmsSmoothingCoeff { 0.85f };  // Default: moderate smoothing
+    float rmsSmoothingCoeff { 0.95f };  // Aggressive smoothing for stable meter
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
 };
