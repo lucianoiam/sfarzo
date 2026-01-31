@@ -78,6 +78,14 @@ PluginEditor::PluginEditor(PluginProcessor& p)
         juce::Colour(0xFF2D2D2D));
 
     addAndMakeVisible(composeComponent);
+
+    // Start RMS metering timer (~30fps)
+    startTimerHz(30);
+}
+
+PluginEditor::~PluginEditor()
+{
+    stopTimer();
 }
 
 void PluginEditor::paint(juce::Graphics& g)
@@ -102,5 +110,17 @@ void PluginEditor::sendSfzError(const juce::String& error)
 {
     juce::ValueTree tree("sfzError");
     tree.setProperty("message", error, nullptr);
+    composeComponent.sendEvent(tree);
+}
+
+void PluginEditor::timerCallback()
+{
+    sendRmsLevel(processorRef.getRmsLevel());
+}
+
+void PluginEditor::sendRmsLevel(float level)
+{
+    juce::ValueTree tree("rmsLevel");
+    tree.setProperty("level", level, nullptr);
     composeComponent.sendEvent(tree);
 }

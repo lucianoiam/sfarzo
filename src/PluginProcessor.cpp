@@ -126,6 +126,12 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiB
     auto numSamples = buffer.getNumSamples();
     float* outputs[2] = { buffer.getWritePointer(0), buffer.getWritePointer(1) };
     sfizz_render_block(synth, outputs, 2, numSamples);
+
+    // Calculate RMS for metering (max of both channels)
+    float rms = 0.0f;
+    for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
+        rms = std::max(rms, buffer.getRMSLevel(ch, 0, numSamples));
+    rmsLevel.store(rms);
 }
 
 bool PluginProcessor::hasEditor() const

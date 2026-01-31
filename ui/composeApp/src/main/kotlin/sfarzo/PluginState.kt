@@ -15,6 +15,7 @@ import juce_cmp.ipc.JuceValueTree
 class PluginState {
     var sfzName by mutableStateOf("")
     var sfzError by mutableStateOf("")
+    var rmsLevel by mutableStateOf(0f)
 
     fun onJuceEvent(tree: JuceValueTree) {
         when (tree.type) {
@@ -24,6 +25,9 @@ class PluginState {
             }
             "sfzError" -> {
                 sfzError = tree["message"].toStr()
+            }
+            "rmsLevel" -> {
+                rmsLevel = tree["level"].toStr().toFloatOrNull() ?: 0f
             }
         }
     }

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <atomic>
 #include <mutex>
 
 // Forward declare sfizz C API type
@@ -50,6 +51,9 @@ public:
     // Get the currently loaded SFZ name (empty if none)
     juce::String getLoadedSfzName() const { return loadedSfzName; }
 
+    // Get current RMS level (0.0 to 1.0)
+    float getRmsLevel() const { return rmsLevel.load(); }
+
 private:
     sfizz_synth_t* synth = nullptr;
     juce::String loadedSfzName;
@@ -57,6 +61,9 @@ private:
     // MIDI from UI, accessed from both message thread and audio thread
     juce::MidiBuffer uiMidiBuffer;
     std::mutex uiMidiMutex;
+
+    // RMS level for metering (written from audio thread, read from message thread)
+    std::atomic<float> rmsLevel { 0.0f };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginProcessor)
 };
